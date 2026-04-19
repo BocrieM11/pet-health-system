@@ -5,7 +5,7 @@ const { authenticateToken } = require('../middleware/auth');
 
 // 获取用户的所有提醒
 router.get('/', authenticateToken, async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user.id;
   const { status, type } = req.query;
 
   try {
@@ -39,7 +39,7 @@ router.get('/', authenticateToken, async (req, res) => {
 
 // 获取单个提醒详情
 router.get('/:id', authenticateToken, async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user.id;
   const reminderId = req.params.id;
 
   try {
@@ -65,7 +65,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
 // 创建新提醒
 router.post('/', authenticateToken, async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user.id;
   const { pet_id, reminder_type, title, description, scheduled_time, notification_methods } = req.body;
 
   // 验证必填字段
@@ -114,7 +114,7 @@ router.post('/', authenticateToken, async (req, res) => {
 
 // 更新提醒
 router.put('/:id', authenticateToken, async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user.id;
   const reminderId = req.params.id;
   const { title, description, scheduled_time, status, notification_methods } = req.body;
 
@@ -180,7 +180,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
 
 // 删除提醒
 router.delete('/:id', authenticateToken, async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user.id;
   const reminderId = req.params.id;
 
   try {
@@ -206,7 +206,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 
 // 自动创建疫苗提醒（当疫苗记录有下次接种日期时）
 router.post('/auto-vaccine/:vaccinationId', authenticateToken, async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user.id;
   const vaccinationId = req.params.vaccinationId;
 
   try {
@@ -263,7 +263,7 @@ router.post('/auto-vaccine/:vaccinationId', authenticateToken, async (req, res) 
 
 // 获取待处理的提醒（用于定时任务检查）
 router.get('/check/pending', authenticateToken, async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user.id;
   const now = new Date().toISOString();
 
   try {

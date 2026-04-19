@@ -6,7 +6,7 @@ const { authenticateToken } = require('../middleware/auth');
 // AI分析 - 分析宠物健康数据
 router.post('/analyze/:petId', authenticateToken, async (req, res) => {
   const { petId } = req.params;
-  const userId = req.user.userId;
+  const userId = req.user.id; // 修复：JWT中的字段名是id，不是userId
 
   try {
     // 验证宠物所有权（允许访问user_id为NULL的旧数据）

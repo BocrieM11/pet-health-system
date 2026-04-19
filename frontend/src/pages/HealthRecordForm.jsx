@@ -33,6 +33,16 @@ function HealthRecordForm() {
     notes: ''
   });
 
+  // 疫苗记录表单数据
+  const [includeVaccine, setIncludeVaccine] = useState(false);
+  const [vaccineData, setVaccineData] = useState({
+    vaccine_name: '',
+    vaccination_date: new Date().toISOString().split('T')[0],
+    next_due_date: '',
+    veterinarian: '',
+    notes: ''
+  });
+
   useEffect(() => {
     fetchPets();
   }, []);
@@ -57,6 +67,14 @@ function HealthRecordForm() {
     }));
   };
 
+  const handleVaccineChange = (e) => {
+    const { name, value } = e.target;
+    setVaccineData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -67,10 +85,16 @@ function HealthRecordForm() {
       return;
     }
 
+    // 如果勾选了疫苗记录，验证必填项
+    if (includeVaccine && !vaccineData.vaccine_name) {
+      setError('请填写疫苗名称');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // 处理数据，将空字符串转换为null
+      // 处理健康记录数据，将空字符串转换为null
       const submitData = { ...formData };
       Object.keys(submitData).forEach(key => {
         if (submitData[key] === '') {
@@ -78,10 +102,28 @@ function HealthRecordForm() {
         }
       });
 
+      // 提交健康记录
       await healthAPI.addHealthRecord(submitData);
-      setSuccess('健康记录添加成功！');
 
-      // 3秒后跳转
+      // 如果勾选了疫苗记录，同时提交疫苗记录
+      if (includeVaccine && vaccineData.vaccine_name) {
+        const vaccineSubmitData = {
+          pet_id: formData.pet_id,
+          ...vaccineData
+        };
+        // 处理空字符串
+        Object.keys(vaccineSubmitData).forEach(key => {
+          if (vaccineSubmitData[key] === '') {
+            vaccineSubmitData[key] = null;
+          }
+        });
+        await healthAPI.addVaccination(vaccineSubmitData);
+        setSuccess('健康记录和疫苗记录添加成功！');
+      } else {
+        setSuccess('健康记录添加成功！');
+      }
+
+      // 1.5秒后跳转
       setTimeout(() => {
         navigate(`/pet/${formData.pet_id}`);
       }, 1500);
@@ -324,6 +366,90 @@ function HealthRecordForm() {
                 placeholder="其他需要记录的信息"
               />
             </div>
+          </div>
+
+          {/* 疫苗记录（可选） */}
+          <div style={{ marginBottom: '2rem', padding: '1.5rem', background: '#f0f9ff', borderRadius: '8px', border: '2px dashed #3b82f6' }}>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
+              <input
+                type="checkbox"
+                id="includeVaccine"
+                checked={includeVaccine}
+                onChange={(e) => setIncludeVaccine(e.target.checked)}
+                style={{ marginRight: '0.5rem', cursor: 'pointer' }}
+              />
+              <label htmlFor="includeVaccine" style={{ cursor: 'pointer', fontWeight: 'bold', color: '#3b82f6', margin: 0 }}>
+                💉 同时添加疫苗接种记录
+              </label>
+            </div>
+
+            {includeVaccine && (
+              <div>
+                <div className="form-group">
+                  <label>疫苗名称 *</label>
+                  <input
+                    type="text"
+                    name="vaccine_name"
+                    value={vaccineData.vaccine_name}
+                    onChange={handleVaccineChange}
+                    placeholder="例: 狂犬疫苗、犬三联疫苗"
+                    required={includeVaccine}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                  <div className="form-group">
+                    <label>接种日期 *</label>
+                    <input
+                      type="date"
+                      name="vaccination_date"
+                      value={vaccineData.vaccination_date}
+                      onChange={handleVaccineChange}
+                      required={includeVaccine}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>下次接种日期</label>
+                    <input
+                      type="date"
+                      name="next_due_date"
+                      value={vaccineData.next_due_date}
+                      onChange={handleVaccineChange}
+                      placeholder="下次应接种的日期"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>兽医师</label>
+                    <input
+                      type="text"
+                      name="veterinarian"
+                      value={vaccineData.veterinarian}
+                      onChange={handleVaccineChange}
+                      placeholder="兽医师姓名"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>疫苗备注</label>
+                  <textarea
+                    name="notes"
+                    value={vaccineData.notes}
+                    onChange={handleVaccineChange}
+                    rows="2"
+                    placeholder="疫苗相关备注信息，如生产厂家、批次号等"
+                  />
+                </div>
+              </div>
+            )}
+
+            {!includeVaccine && (
+              <p style={{ margin: 0, color: '#999', fontSize: '0.9rem', fontStyle: 'italic' }}>
+                勾选上方复选框可同时记录疫苗接种信息
+              </p>
+            )}
           </div>
 
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>

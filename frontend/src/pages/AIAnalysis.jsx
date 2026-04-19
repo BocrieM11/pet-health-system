@@ -47,12 +47,18 @@ function AIAnalysis() {
       return;
     }
 
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('请先登录后再使用AI分析功能');
+      setTimeout(() => navigate('/login'), 2000);
+      return;
+    }
+
     setAnalyzing(true);
     setError('');
     setAnalysis(null);
 
     try {
-      const token = localStorage.getItem('token');
       const response = await axios.post(
         `http://localhost:3001/api/ai/analyze/${petId}`,
         {},
@@ -65,7 +71,19 @@ function AIAnalysis() {
 
       setAnalysis(response.data.analysis);
     } catch (err) {
-      setError(err.response?.data?.error || 'AI分析失败，请重试');
+      const errorMsg = err.response?.data?.error || 'AI分析失败，请重试';
+      if (err.response?.status === 401) {
+        setError('登录已过期，请重新登录');
+        setTimeout(() => {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          navigate('/login');
+        }, 2000);
+      } else if (err.response?.status === 404) {
+        setError('宠物未找到或无权访问。请确保使用添加该宠物的账号登录。');
+      } else {
+        setError(errorMsg);
+      }
     } finally {
       setAnalyzing(false);
     }

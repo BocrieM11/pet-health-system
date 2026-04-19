@@ -9,7 +9,7 @@ const fs = require('fs');
 
 // 导出宠物健康报告为PDF
 router.get('/pdf/:petId', authenticateToken, async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user.id;
   const petId = req.params.petId;
   const { from, to } = req.query;
 
@@ -177,7 +177,7 @@ router.get('/pdf/:petId', authenticateToken, async (req, res) => {
 
 // 导出健康记录为Excel
 router.get('/excel/:petId', authenticateToken, async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user.id;
   const petId = req.params.petId;
   const { from, to } = req.query;
 
@@ -299,7 +299,7 @@ router.get('/excel/:petId', authenticateToken, async (req, res) => {
 
 // 导出为CSV
 router.get('/csv/:petId', authenticateToken, async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user.id;
   const petId = req.params.petId;
   const { from, to } = req.query;
 
@@ -382,7 +382,7 @@ router.get('/csv/:petId', authenticateToken, async (req, res) => {
 
 // 导出所有数据（JSON格式）
 router.get('/json/:petId', authenticateToken, async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user.id;
   const petId = req.params.petId;
 
   try {

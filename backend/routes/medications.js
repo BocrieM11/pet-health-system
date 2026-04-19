@@ -5,7 +5,7 @@ const { authenticateToken } = require('../middleware/auth');
 
 // 获取宠物的所有用药记录
 router.get('/pet/:petId', authenticateToken, async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user.id;
   const petId = req.params.petId;
 
   try {
@@ -39,7 +39,7 @@ router.get('/pet/:petId', authenticateToken, async (req, res) => {
 
 // 添加用药记录
 router.post('/', authenticateToken, async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user.id;
   const { pet_id, medication_name, dosage, frequency, start_date, end_date, notes } = req.body;
 
   // 验证必填字段
@@ -82,7 +82,7 @@ router.post('/', authenticateToken, async (req, res) => {
 
 // 更新用药记录
 router.put('/:id', authenticateToken, async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user.id;
   const medicationId = req.params.id;
   const { medication_name, dosage, frequency, start_date, end_date, notes } = req.body;
 
@@ -154,7 +154,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
 
 // 删除用药记录
 router.delete('/:id', authenticateToken, async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user.id;
   const medicationId = req.params.id;
 
   try {
@@ -181,7 +181,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 
 // 获取当前正在进行的用药
 router.get('/active/all', authenticateToken, async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user.id;
   const today = new Date().toISOString().split('T')[0];
 
   try {
