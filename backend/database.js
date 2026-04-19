@@ -177,12 +177,23 @@ async function initPostgresDatabase(pool) {
       )
     `);
 
-    // 创建索引
-    await pool.query('CREATE INDEX IF NOT EXISTS idx_pets_user_id ON pets(user_id)');
-    await pool.query('CREATE INDEX IF NOT EXISTS idx_health_records_pet_id ON health_records(pet_id)');
-    await pool.query('CREATE INDEX IF NOT EXISTS idx_vaccinations_pet_id ON vaccinations(pet_id)');
-    await pool.query('CREATE INDEX IF NOT EXISTS idx_reminders_user_id ON reminders(user_id)');
-    await pool.query('CREATE INDEX IF NOT EXISTS idx_medications_pet_id ON medications(pet_id)');
+    // 创建索引（使用DO语句避免IF NOT EXISTS的兼容性问题）
+    const createIndexSafely = async (indexName, tableName, column) => {
+      try {
+        await pool.query(`CREATE INDEX ${indexName} ON ${tableName}(${column})`);
+      } catch (err) {
+        // 索引已存在，忽略错误
+        if (err.code !== '42P07') { // 42P07 = duplicate_table (索引已存在)
+          console.error(`创建索引 ${indexName} 失败:`, err.message);
+        }
+      }
+    };
+
+    await createIndexSafely('idx_pets_user_id', 'pets', 'user_id');
+    await createIndexSafely('idx_health_records_pet_id', 'health_records', 'pet_id');
+    await createIndexSafely('idx_vaccinations_pet_id', 'vaccinations', 'pet_id');
+    await createIndexSafely('idx_reminders_user_id', 'reminders', 'user_id');
+    await createIndexSafely('idx_medications_pet_id', 'medications', 'pet_id');
 
     console.log('✅ PostgreSQL数据库表和索引初始化完成');
   } catch (error) {
