@@ -19,17 +19,26 @@ if (process.env.DATABASE_URL) {
   });
 
   // 封装统一的数据库接口
+  // 转换SQLite风格的?占位符为PostgreSQL风格的$1, $2...
+  const convertPlaceholders = (sql) => {
+    let index = 0;
+    return sql.replace(/\?/g, () => `$${++index}`);
+  };
+
   db = {
     all: async (sql, params = []) => {
-      const result = await pool.query(sql, params);
+      const pgSql = convertPlaceholders(sql);
+      const result = await pool.query(pgSql, params);
       return result.rows;
     },
     get: async (sql, params = []) => {
-      const result = await pool.query(sql, params);
+      const pgSql = convertPlaceholders(sql);
+      const result = await pool.query(pgSql, params);
       return result.rows[0];
     },
     run: async (sql, params = []) => {
-      const result = await pool.query(sql, params);
+      const pgSql = convertPlaceholders(sql);
+      const result = await pool.query(pgSql, params);
       return {
         lastID: result.rows[0]?.id,
         changes: result.rowCount
