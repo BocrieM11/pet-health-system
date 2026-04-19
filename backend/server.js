@@ -11,7 +11,13 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // 中间件
-app.use(cors());
+// CORS配置
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 app.use(compression()); // 启用响应压缩
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
