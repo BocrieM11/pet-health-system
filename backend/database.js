@@ -37,7 +37,15 @@ if (process.env.DATABASE_URL) {
       return result.rows[0];
     },
     run: async (sql, params = []) => {
-      const pgSql = convertPlaceholders(sql);
+      let pgSql = convertPlaceholders(sql);
+
+      // 如果是INSERT语句，自动添加RETURNING id以获取新插入的ID
+      if (pgSql.trim().toUpperCase().startsWith('INSERT')) {
+        if (!pgSql.toUpperCase().includes('RETURNING')) {
+          pgSql += ' RETURNING id';
+        }
+      }
+
       const result = await pool.query(pgSql, params);
       return {
         lastID: result.rows[0]?.id,
